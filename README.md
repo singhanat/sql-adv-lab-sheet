@@ -1286,6 +1286,12 @@ ORDER BY customer_id, order_date;
 
 ---
 
+![img](img/window-frame-row-vs-range.png)
+
+![img](img/aggregate.png)
+
+---
+
 ### Q24 : ยอดสะสม Freight รายออเดอร์ของแต่ละพนักงาน (Running Total)
 **Topic:** `Window Frame ROWS BETWEEN (Cumulative)`
 
@@ -1386,6 +1392,10 @@ ORDER BY employee_id, order_date;
 
 ---
 
+![img](img/ranking.png)
+
+---
+
 ### Q26 : จัดอันดับพนักงานตามยอดขาย (RANK vs DENSE_RANK)
 **Topic:** `RANK() / DENSE_RANK()`
 
@@ -1440,6 +1450,10 @@ ORDER BY total_freight DESC;
 ```
 
 </details>
+
+---
+
+![img](img/distribution.png)
 
 ---
 
@@ -1500,6 +1514,10 @@ ORDER BY c.category_name, p.unit_price;
 
 ---
 
+![img](img/analytical.png)
+
+---
+
 ### Q28 : เปรียบ Freight Order ปัจจุบันกับ Order ก่อนและหลัง (LAG + LEAD)
 **Topic:** `LAG() / LEAD()`
 
@@ -1541,6 +1559,10 @@ ORDER BY customer_id, order_date;
 ```
 
 </details>
+
+---
+
+![img](img/analytical-2.png)
 
 ---
 
@@ -1591,6 +1613,10 @@ ORDER BY customer_id, order_date;
 ```
 
 </details>
+
+---
+
+![img](img/analytical-3.png)
 
 ---
 
