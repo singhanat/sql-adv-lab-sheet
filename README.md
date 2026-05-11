@@ -8,7 +8,7 @@
 - Section V — Window Functions (Q22–Q30)
 
 ## Data set
-![ER](ER.png)
+![ER](img/ER.png)
 
 ---
 ## Section I — Advanced Joins & Set Operations (Q1–Q8)
