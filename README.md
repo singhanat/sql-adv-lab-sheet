@@ -90,7 +90,7 @@ SELECT a.product_name AS product_a,
        b.product_name AS product_b,
        a.unit_price AS price_a,
        b.unit_price AS price_b,
-       ROUND(ABS(a.unit_price - b.unit_price)::NUMERIC, 2) AS price_diff
+       ROUND(CAST(ABS(a.unit_price - b.unit_price) AS DECIMAL(10,2)), 2) AS price_diff
 FROM products a
 JOIN products b ON a.category_id = b.category_id
                AND a.product_id < b.product_id
@@ -220,6 +220,54 @@ LEFT JOIN categories c ON p.category_id = c.category_id
 LEFT JOIN order_details od ON p.product_id = od.product_id
 GROUP BY p.product_name, c.category_name
 ORDER BY order_count DESC;
+```
+
+</details>
+
+---
+
+### Q5 : Order ที่ Freight สูงกว่าค่าเฉลี่ย Freight ของ Employee คนนั้น
+**Topic:** `MULTIPLE JOINS: Non-equi JOIN condition`
+
+**Scenario:**
+ต้องการหา Order ที่มี Freight สูงกว่าค่าเฉลี่ย Freight ของพนักงานคนเดียวกัน โดยใช้ JOIN กับ derived table และ non-equi condition
+
+**Task:**
+แสดง OrderID, EmployeeID, Freight, AvgFreight (ทศนิยม 2) เรียงตาม Freight DESC
+
+**Sample Data:**
+
+*Table: `orders (sample)`*
+
+| order_id | employee_id | freight |
+| --- | --- | --- |
+| 10248 | 1 | 32.38 |
+| 10249 | 1 | 11.61 |
+| 10250 | 1 | 65.83 |
+| 10251 | 2 | 41.34 |
+| 10252 | 2 | 51.30 |
+
+**Expected Output:**
+
+| order_id | employee_id | freight | avg_freight |
+| --- | --- | --- | --- |
+| 10250 | 1 | 65.83 | 36.61 |
+| 10252 | 2 | 51.30 | 46.32 |
+
+<details>
+<summary>💡 Solution</summary>
+
+```sql
+SELECT o.order_id, o.employee_id, o.freight,
+       ROUND(CAST(avg_e.avg_freight AS DECIMAL(10,2)), 2) AS avg_freight
+FROM orders o
+JOIN (
+    SELECT employee_id, AVG(freight) AS avg_freight
+    FROM orders
+    GROUP BY employee_id
+) avg_e ON o.employee_id = avg_e.employee_id
+        AND o.freight > avg_e.avg_freight
+ORDER BY o.freight DESC;
 ```
 
 </details>
