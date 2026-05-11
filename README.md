@@ -102,8 +102,8 @@ ORDER BY price_diff;
 
 ---
 
-### Q3 · รายละเอียด Order พร้อมลูกค้าและพนักงาน (3-table JOIN)
-**Section:** I &nbsp;|&nbsp; **Topic:** `MULTIPLE JOINS: JOIN & JOIN`
+### Q3 : รายละเอียด Order พร้อมลูกค้าและพนักงาน (3-table JOIN)
+**Topic:** `MULTIPLE JOINS: JOIN & JOIN`
 
 **Scenario:**
 ทีม Sales ต้องการ report ที่รวมข้อมูล Order, ชื่อลูกค้า และชื่อพนักงานที่รับออเดอร์ไว้ในตารางเดียว เฉพาะปี 1997
@@ -150,13 +150,76 @@ ORDER BY price_diff;
 ```sql
 SELECT o.order_id,
        c.company_name AS customer_name,
-       e.first_name || ' ' || e.last_name AS employee_name,
+       CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
        o.order_date
 FROM orders o
 JOIN customers c ON o.customer_id = c.customer_id
 JOIN employees e ON o.employee_id = e.employee_id
 WHERE EXTRACT(YEAR FROM o.order_date) = 1997
 ORDER BY o.order_date;
+```
+
+</details>
+
+---
+
+### Q4 : สินค้าทุกชิ้นพร้อมชื่อ Category (บางชิ้นอาจไม่มี Category)
+**Topic:** `MULTIPLE JOINS: JOIN & LEFT JOIN`
+
+**Scenario:**
+ทีม Data ต้องการ list สินค้าทุกชิ้น แม้บางชิ้นยังไม่ได้จัด Category โดยให้ JOIN กับ order_details เพื่อดูว่าเคยขายแล้วหรือยัง และ LEFT JOIN กับ categories เพื่อดูชื่อหมวด
+
+**Task:**
+แสดง ProductName, CategoryName (NULL = 'Uncategorized'), OrderCount เรียงตาม OrderCount DESC
+
+**Sample Data:**
+
+*Table: `products`*
+
+| product_id | product_name | category_id |
+| --- | --- | --- |
+| 1 | Chai | 1 |
+| 2 | Chang | 1 |
+| 3 | Aniseed Syrup | 2 |
+| 99 | Mystery Item |  |
+
+*Table: `categories`*
+
+| category_id | category_name |
+| --- | --- |
+| 1 | Beverages |
+| 2 | Condiments |
+
+*Table: `order_details`*
+
+| order_id | product_id |
+| --- | --- |
+| 10248 | 1 |
+| 10249 | 1 |
+| 10250 | 2 |
+| 10251 | 3 |
+
+**Expected Output:**
+
+| product_name | category_name | order_count |
+| --- | --- | --- |
+| Chai | Beverages | 2 |
+| Aniseed Syrup | Condiments | 1 |
+| Chang | Beverages | 1 |
+| Mystery Item | Uncategorized | 0 |
+
+<details>
+<summary>💡 Solution</summary>
+
+```sql
+SELECT p.product_name,
+       COALESCE(c.category_name, 'Uncategorized') AS category_name,
+       COUNT(od.order_id) AS order_count
+FROM products p
+LEFT JOIN categories c ON p.category_id = c.category_id
+LEFT JOIN order_details od ON p.product_id = od.product_id
+GROUP BY p.product_name, c.category_name
+ORDER BY order_count DESC;
 ```
 
 </details>
