@@ -1286,6 +1286,8 @@ ORDER BY customer_id, order_date;
 
 ---
 
+![img](img/window-frame.png)
+
 ![img](img/window-frame-row-vs-range.png)
 
 ![img](img/aggregate.png)
