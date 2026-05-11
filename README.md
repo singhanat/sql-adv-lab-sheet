@@ -1194,6 +1194,8 @@ ORDER BY category_name, rank;
 
 ## Section V — Window Functions (Q22–Q30)
 
+![Window Functions](img/window-functions.png)
+
 ---
 
 ### Q22 : จำนวน Order ทั้งหมดของแต่ละ Customer แสดงทุก row
