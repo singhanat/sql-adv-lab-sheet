@@ -7,6 +7,21 @@
 - Section IV — Common Table Expressions (CTEs) (Q18–Q21)
 - Section V — Window Functions (Q22–Q30)
 
+## PG4ADMIN
+
+URL: http://pgadmin4.datacaster.org/
+
+Username
+```
+user_XXX
+```
+XXX แทนด้วยลำดับของท่านที่ได้รับจาก TA
+
+Password
+```
+strange_stoic_shannon
+```
+
 ## Data set
 ![ER](img/ER.png)
 
