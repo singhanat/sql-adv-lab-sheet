@@ -1726,3 +1726,18 @@ ORDER BY customer_id, order_date;
 
 </details>
 
+
+
+```
+
+select 
+	EXTRACT (YEAR FROM order_date) AS year,
+	SUM(CASE WHEN EXTRACT(MONTH FROM order_date) IN (1, 2, 3) THEN freight ELSE 0 END) AS Q1,
+	SUM(CASE WHEN EXTRACT(MONTH FROM order_date) IN (4, 5, 6) THEN freight ELSE 0 END) AS Q2,
+	SUM(CASE WHEN EXTRACT(MONTH FROM order_date) IN (7, 8, 9) THEN freight ELSE 0 END) AS Q3,
+	SUM(CASE WHEN EXTRACT(MONTH FROM order_date) IN (10, 11, 12) THEN freight ELSE 0 END) AS Q4
+from orders
+group by year
+
+
+```
