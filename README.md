@@ -1741,3 +1741,24 @@ group by year
 
 
 ```
+
+```
+WITH moving AS (
+
+	SELECT employee_id, order_id, order_date, freight,
+	       ROUND(CAST(AVG(freight) OVER (
+	           PARTITION BY employee_id
+	           ORDER BY order_date
+	           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+	       ) AS DECIMAL(10,2)), 2) AS moving_avg_3
+	FROM orders
+	ORDER BY employee_id, order_date
+)
+SELECT employee_id, EXTRACT (YEAR FROM order_date) AS year,
+	AVG(CASE WHEN EXTRACT(MONTH FROM order_date) IN (1, 2, 3) THEN moving_avg_3 ELSE 0 END) AS Q1,
+	AVG(CASE WHEN EXTRACT(MONTH FROM order_date) IN (4, 5, 6) THEN moving_avg_3 ELSE 0 END) AS Q2,
+	AVG(CASE WHEN EXTRACT(MONTH FROM order_date) IN (7, 8, 9) THEN moving_avg_3 ELSE 0 END) AS Q3,
+	AVG(CASE WHEN EXTRACT(MONTH FROM order_date) IN (10, 11, 12) THEN moving_avg_3 ELSE 0 END) AS Q4
+FROM moving
+group by employee_id, EXTRACT (YEAR FROM order_date)
+```
