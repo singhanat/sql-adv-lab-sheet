@@ -13,7 +13,7 @@ URL: http://pgadmin4.datacaster.org/
 
 Username
 ```
-user_XXX
+user_XXX@datacaster.org
 ```
 XXX แทนด้วยลำดับของท่านที่ได้รับจาก TA
 
