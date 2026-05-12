@@ -34,6 +34,12 @@ Password
 tenacious_trusting_torvalds
 ```
 
+![setup_1](img/setup_1.png)
+
+![setup_1](img/setup_2.png)
+
+![setup_1](img/setup_3.png)
+
 ## Data set
 ![ER](img/ER.png)
 
