@@ -1083,6 +1083,26 @@ JOIN employees e ON er.employee_id = e.employee_id
 ORDER BY er.rank;
 ```
 
+```sql
+WITH emp_sales AS (
+	SELECT o.employee_id, SUM(od.unit_price * od.quantity) AS total_revenue
+	FROM orders o
+	JOIN order_details od ON o.order_id = od.order_id
+	GROUP BY o.employee_id
+),
+emp_ranked AS (
+	SELECT es1.employee_id, es1.total_revenue, 
+		COUNT(es2.employee_id) + 1 AS rank
+	FROM emp_sales es1
+	LEFT JOIN emp_sales es2 ON es2.total_revenue > es1.total_revenue
+	GROUP BY es1.employee_id, es1.total_revenue
+)
+SELECT CONCAT(first_name, ' ', last_name) AS employee_name, total_revenue, rank
+FROM emp_ranked er
+JOIN employees e ON er.employee_id = e.employee_id
+ORDER BY er.rank
+```
+
 </details>
 
 ---
