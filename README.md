@@ -22,6 +22,18 @@ Password
 strange_stoic_shannon
 ```
 
+## การเพิ่ม PostgreSQL Database 
+
+Username
+```
+dbuser
+```
+
+Password
+```
+tenacious_trusting_torvalds
+```
+
 ## Data set
 ![ER](img/ER.png)
 
