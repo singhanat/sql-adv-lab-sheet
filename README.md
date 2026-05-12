@@ -1,3 +1,8 @@
+```
+admin@datacaster.org   :   m6242wovepa5qcy7sqyvycr9weyhrhan
+```
+
+
 # Advanced Data Analysis and Query Optimization Using SQL
 
 **แบบฝึกหัด จำนวน 30 ข้อ**
