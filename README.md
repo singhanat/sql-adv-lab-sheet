@@ -1033,6 +1033,52 @@ Andrew Fuller เป็น CEO ของ Northwind
 > recursive CTE เริ่มจาก top seller แทนที่จะเริ่มจาก CEO
 > แสดงเฉพาะ subtree ของ top seller (รวมตัวเอง)
 
+```
+WITH RECURSIVE emp_revenue AS (
+	-- อยากรู้ว่า ทุกคน ขายของได้เท่าไหร่
+	SELECT o.employee_id, sum((od.quantity * od.unit_price) * (1 - od.discount)) as total_revenue
+	from orders o
+	join order_details od ON o.order_id = od.order_id
+	group by o.employee_id
+),
+top_seller AS (
+	-- ใครขายได้มากที่สุด
+	select employee_id 
+	from emp_revenue
+	order by total_revenue desc
+	limit 1
+),
+org AS (
+	-- หา STRUCTURE ของ องค์กร ใต้เค้า
+
+	--- anchor === คนที่ขายเก่งที่สุด ==== top_seller
+	select e.employee_id, 
+		CONCAT(e.first_name, ' ', e.last_name) as full_name,
+		e.reports_to,
+		0 as level,
+		CONCAT(e.first_name, ' ', e.last_name) as path
+	from employees e
+	where e.employee_id = (select employee_id from top_seller)
+
+	union all
+
+	--- เงื่อนไขทั่วไป
+	select e.employee_id, 
+		CONCAT(e.first_name, ' ', e.last_name) as full_name,
+		e.reports_to,
+		org.level + 1,
+		CONCAT(org.path, '>', CONCAT(e.first_name, ' ', e.last_name)) as path
+	from employees e
+	join org on e.reports_to = org.employee_id
+)
+SELECT 
+	org.full_name,
+	org.level,
+	org.path,
+	er.total_revenue
+FROM org 
+JOIN emp_revenue er ON org.employee_id = er.employee_id
+```
 ---
 
 
