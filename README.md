@@ -287,7 +287,7 @@ ORDER BY order_date;
 
 ---
 
-### Challenge A : Lonely Cities
+### Challenge A :  City เดียวกัน
 
 **Scenario:**
 
@@ -346,13 +346,14 @@ ORDER BY order_date;
 
 **Expected Output:**
 
-| employee_a | employee_b | manager_name | order_year |
-| --- | --- | --- | --- |
-| Janet Leverling | Nancy Davolio | Andrew Fuller | 1997 |
-| ... | ... | ... | 1996 |
-| ... | ... | ... | 1997 |
+| City | employee_a | employee_b | manager_name | order_year |
+| --- | --- | --- | --- | --- |
+| --- | Janet Leverling | Nancy Davolio | Andrew Fuller | 1997 |
+| --- | ... | ... | ... | 1996 |
+| --- | ... | ... | ... | 1997 |
 
-```
+```sql
+-- เดี๋ยวผม (น้องบูม) มาใส่ solution ที่สมบูรณ์ให้นะครับ (ขอโทษครับ T_T)
 SELECT e_a.employee_id, e_b.employee_id, o_a.ship_city
 FROM orders o_a
 JOIN employees e_a ON o_a.employee_id = e_a.employee_id
