@@ -462,7 +462,7 @@ ORDER BY order_date;
 
 ### Challenge A : Lonely Cities
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -751,7 +751,7 @@ ORDER BY e.employee_id;
 
 ### Challenge B : Loyal but Forgotten
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -1064,7 +1064,7 @@ ORDER BY c.category_name;
 
 ### Challenge C : The Slow Movers
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -1415,7 +1415,7 @@ ORDER BY level, employee_id;
 
 ### Challenge D : Who Reports to a Top Seller
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -1765,7 +1765,7 @@ ORDER BY employee_id, order_date;
 
 ### Challenge E : The Comeback Customer
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -2105,7 +2105,7 @@ ORDER BY customer_id, order_date;
 
 ### Challenge F : Category Stars
 
-**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -2178,7 +2178,7 @@ ORDER BY customer_id, order_date;
 
 ### Challenge G : NPV ของ Revenue Stream ต่อลูกค้า
 
-**Level:** `Advanced — Finance` &nbsp;|&nbsp; **1 SQL Statement**
+**Level:** `Advanced — Finance`
 
 ---
 
