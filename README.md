@@ -1940,6 +1940,49 @@ $$
 > - `customer_total_npv` (592.78) < `total_revenue_no_discount` (606.35) เสมอ — เพราะ NPV หักมูลค่าเวลาออก
 > - TOMSP มี NPV รวมน้อยกว่า VINET จึงได้ `npv_rank` = 2
 
+```
+WITH order_revenue AS (
+
+	SELECT 
+		o.order_id, 
+		o.customer_id,
+		o.order_date,
+		SUM(od.quantity * od.unit_price * (1 - od.discount)) AS order_revenue
+	FROM orders o
+	JOIN order_details od ON o.order_id = od.order_id
+	GROUP BY o.order_id,  o.customer_id, o.order_date
+),
+order_with_period As (
+SELECT 	order_id, 
+		customer_id,
+		order_date,
+		order_revenue,
+		first_value(order_date) over (
+			partition by customer_id
+			order by order_date
+			rows between unbounded preceding and unbounded following
+		) as first_order_date
+		FROM order_revenue
+),
+order_discounted as (
+SELECT 	order_id, 
+		customer_id,
+		order_date,
+		order_revenue,
+		(order_date - first_order_date)::numeric / 365.25 as years_since_first_order,
+		(order_revenue / power(1.10, (order_date - first_order_date)::numeric / 365.25)) as discounted_revenue
+			
+	FROM order_with_period
+)
+
+SELECT customer_id, 
+	SUM(discounted_revenue) as customer_total_npv,
+	SUM(order_revenue) as total_revenue_no_discount
+FROM order_discounted
+GROUP BY customer_id
+
+```
+
 ---
 
 
