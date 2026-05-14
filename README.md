@@ -2228,16 +2228,7 @@ $$
 
 **ตัวอย่างตัวเลข:**
 
-$$
-\begin{aligned}
-\text{firstOrderDate} &= \text{1996-07-04} \\
-\text{orderDate}        &= \text{1997-11-11} \\
-\text{interval}           &= 495 \text{ วัน} \\[6pt]
-\text{epoch}              &= 495 \times 86{,}400 = 42{,}768{,}000 \text{ วินาที} \\[6pt]
-t                         &= \frac{42{,}768{,}000}{365.25 \times 86{,}400} = 1.3552 \text{ ปี} \\[6pt]
-\text{discountedRevenue} &= \frac{CF}{(1.10)^{1.3552}} = \frac{CF}{1.1377}
-\end{aligned}
-$$
+![eq](img/eq.png)
 
 > **ทำไมใช้ $365.25$ ไม่ใช่ $365$?** (Assumption #4)
 >
