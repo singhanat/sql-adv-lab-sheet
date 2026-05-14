@@ -3,7 +3,6 @@
 
 # Advanced Data Analysis and Query Optimization Using SQL
 
-**แบบฝึกหัด จำนวน 30 ข้อ**
 - Section I — Advanced Joins & Set Operations (Q1–Q8)
 - Section II — Advanced Subqueries (Q9–Q14)
 - Section III — Performance Tuning & Query Rewriting (Q15–Q17)
