@@ -352,7 +352,18 @@ ORDER BY order_date;
 | ... | ... | ... | 1996 |
 | ... | ... | ... | 1997 |
 
+```
+SELECT e_a.employee_id, e_b.employee_id, o_a.ship_city
+FROM orders o_a
+JOIN employees e_a ON o_a.employee_id = e_a.employee_id
+JOIN orders o_b ON o_a.ship_city = o_b.ship_city
+JOIN employees e_b ON o_b.employee_id = e_b.employee_id
+WHERE EXTRACT(YEAR from o_a.order_date) IN (1996, 1997)
+AND e_a.reports_to = e_b.reports_to
+```
+
 ---
+
 
 ## Section II — Advanced Subqueries (Q9–Q14)
 
