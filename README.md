@@ -5,7 +5,6 @@
 
 - Section I — Advanced Joins & Set Operations (Q1–Q8)
 - Section II — Advanced Subqueries (Q9–Q14)
-- Section III — Performance Tuning & Query Rewriting (Q15–Q17)
 - Section IV — Common Table Expressions (CTEs) (Q18–Q21)
 - Section V — Window Functions (Q22–Q30)
 
