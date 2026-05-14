@@ -144,178 +144,6 @@ ORDER BY price_diff;
 
 ---
 
-### Q3 : รายละเอียด Order พร้อมลูกค้าและพนักงาน (3-table JOIN)
-**Topic:** `MULTIPLE JOINS: JOIN & JOIN`
-
-**Scenario:**
-ทีม Sales ต้องการ report ที่รวมข้อมูล Order, ชื่อลูกค้า และชื่อพนักงานที่รับออเดอร์ไว้ในตารางเดียว เฉพาะปี 1997
-
-**Task:**
-แสดง OrderID, CustomerName, EmployeeName, OrderDate เรียงตาม OrderDate (เฉพาะพนักงานที่มีคำสั่งซื้อเท่านั้น ใช้ INNER JOIN ทุกตาราง)
-
-**Sample Data:**
-
-*Table: `orders`*
-
-| order_id | customer_id | employee_id | order_date |
-| --- | --- | --- | --- |
-| 10400 | EASTC | 1 | 1997-01-01 |
-| 10401 | HANAR | 1 | 1997-01-01 |
-| 10402 | ERNSH | 8 | 1997-01-02 |
-
-*Table: `customers`*
-
-| customer_id | company_name |
-| --- | --- |
-| EASTC | Eastern Connection |
-| HANAR | Hanari Carnes |
-| ERNSH | Ernst Handel |
-
-*Table: `employees`*
-
-| employee_id | first_name | last_name |
-| --- | --- | --- |
-| 1 | Nancy | Davolio |
-| 8 | Laura | Callahan |
-
-**Expected Output:**
-
-| order_id | customer_name | employee_name | order_date |
-| --- | --- | --- | --- |
-| 10400 | Eastern Connection | Nancy Davolio | 1997-01-01 |
-| 10401 | Hanari Carnes | Nancy Davolio | 1997-01-01 |
-| 10402 | Ernst Handel | Laura Callahan | 1997-01-02 |
-
-<details>
-<summary>Solution</summary>
-
-```sql
-SELECT o.order_id,
-       c.company_name AS customer_name,
-       CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
-       o.order_date
-FROM orders o
-JOIN customers c ON o.customer_id = c.customer_id
-JOIN employees e ON o.employee_id = e.employee_id
-WHERE EXTRACT(YEAR FROM o.order_date) = 1997
-ORDER BY o.order_date;
-```
-
-</details>
-
----
-
-### Q4 : สินค้าทุกชิ้นพร้อมชื่อ Category (บางชิ้นอาจไม่มี Category)
-**Topic:** `MULTIPLE JOINS: JOIN & LEFT JOIN`
-
-**Scenario:**
-ทีม Data ต้องการ list สินค้าทุกชิ้น แม้บางชิ้นยังไม่ได้จัด Category โดยให้ JOIN กับ order_details เพื่อดูว่าเคยขายแล้วหรือยัง และ LEFT JOIN กับ categories เพื่อดูชื่อหมวด
-
-**Task:**
-แสดง ProductName, CategoryName (NULL = 'Uncategorized'), OrderCount เรียงตาม OrderCount DESC
-
-**Sample Data:**
-
-*Table: `products`*
-
-| product_id | product_name | category_id |
-| --- | --- | --- |
-| 1 | Chai | 1 |
-| 2 | Chang | 1 |
-| 3 | Aniseed Syrup | 2 |
-| 99 | Mystery Item |  |
-
-*Table: `categories`*
-
-| category_id | category_name |
-| --- | --- |
-| 1 | Beverages |
-| 2 | Condiments |
-
-*Table: `order_details`*
-
-| order_id | product_id |
-| --- | --- |
-| 10248 | 1 |
-| 10249 | 1 |
-| 10250 | 2 |
-| 10251 | 3 |
-
-**Expected Output:**
-
-| product_name | category_name | order_count |
-| --- | --- | --- |
-| Chai | Beverages | 2 |
-| Aniseed Syrup | Condiments | 1 |
-| Chang | Beverages | 1 |
-| Mystery Item | Uncategorized | 0 |
-
-<details>
-<summary>Solution</summary>
-
-```sql
-SELECT p.product_name,
-       COALESCE(c.category_name, 'Uncategorized') AS category_name,
-       COUNT(od.order_id) AS order_count
-FROM products p
-LEFT JOIN categories c ON p.category_id = c.category_id
-LEFT JOIN order_details od ON p.product_id = od.product_id
-GROUP BY p.product_name, c.category_name
-ORDER BY order_count DESC;
-```
-
-</details>
-
----
-
-### Q5 : Order ที่ Freight สูงกว่าค่าเฉลี่ย Freight ของ Employee คนนั้น
-**Topic:** `MULTIPLE JOINS: Non-equi JOIN condition`
-
-**Scenario:**
-ต้องการหา Order ที่มี Freight สูงกว่าค่าเฉลี่ย Freight ของพนักงานคนเดียวกัน โดยใช้ JOIN กับ derived table และ non-equi condition
-
-**Task:**
-แสดง OrderID, EmployeeID, Freight, AvgFreight (ทศนิยม 2) เรียงตาม Freight DESC
-
-**Sample Data:**
-
-*Table: `orders (sample)`*
-
-| order_id | employee_id | freight |
-| --- | --- | --- |
-| 10248 | 1 | 32.38 |
-| 10249 | 1 | 11.61 |
-| 10250 | 1 | 65.83 |
-| 10251 | 2 | 41.34 |
-| 10252 | 2 | 51.30 |
-
-**Expected Output:**
-
-| order_id | employee_id | freight | avg_freight |
-| --- | --- | --- | --- |
-| 10250 | 1 | 65.83 | 36.61 |
-| 10252 | 2 | 51.30 | 46.32 |
-
-<details>
-<summary>Solution</summary>
-
-```sql
-SELECT o.order_id, o.employee_id, o.freight,
-       ROUND(CAST(avg_e.avg_freight AS DECIMAL(10,2)), 2) AS avg_freight
-FROM orders o
-JOIN (
-    SELECT employee_id, AVG(freight) AS avg_freight
-    FROM orders
-    GROUP BY employee_id
-) avg_e ON o.employee_id = avg_e.employee_id
-        AND o.freight > avg_e.avg_freight
-ORDER BY o.freight DESC;
-```
-
-</details>
-
----
-
 ### Q6 : เมืองที่มีทั้ง Customer และ Supplier (INTERSECT)
 **Topic:** `UNION / INTERSECT / EXCEPT`
 
@@ -414,7 +242,7 @@ ORDER BY country;
 ---
 
 ### Q8 · รวม log การสั่งซื้อจาก 2 ปี (UNION ALL รักษา duplicate)
-**Section:** I &nbsp;|&nbsp; **Topic:** `UNION ALL`
+**Topic:** `UNION ALL`
 
 **Scenario:**
 ทีม Data Eng ต้องการ combine คำสั่งซื้อจากปี 1996 และ 1997 ไว้ในชุดเดียวกัน โดยเก็บซ้ำไว้หมด (ไม่ตัด) และเพิ่ม column Year บอกที่มา
@@ -461,8 +289,6 @@ ORDER BY order_date;
 ---
 
 ### Challenge A : Lonely Cities
-
-**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -750,8 +576,6 @@ ORDER BY e.employee_id;
 ---
 
 ### Challenge B : Loyal but Forgotten
-
-**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -1063,8 +887,6 @@ ORDER BY c.category_name;
 ---
 
 ### Challenge C : The Slow Movers
-
-**Level:** `Advanced — Combined`
 
 **Scenario:**
 
@@ -1415,8 +1237,6 @@ ORDER BY level, employee_id;
 
 ### Challenge D : Who Reports to a Top Seller
 
-**Level:** `Advanced — Combined`
-
 **Scenario:**
 
 Andrew Fuller เป็น CEO ของ Northwind
@@ -1765,8 +1585,6 @@ ORDER BY employee_id, order_date;
 
 ### Challenge E : The Comeback Customer
 
-**Level:** `Advanced — Combined`
-
 **Scenario:**
 
 ทีม CRM สังเกตว่าบางลูกค้า **หายไปนาน แล้วกลับมาซื้ออีกครั้ง**
@@ -2105,8 +1923,6 @@ ORDER BY customer_id, order_date;
 
 ### Challenge F : Category Stars
 
-**Level:** `Advanced — Combined`
-
 **Scenario:**
 
 ทีม Product ตั้งคำถามที่น่าสนใจ:
@@ -2176,13 +1992,9 @@ ORDER BY customer_id, order_date;
 
 ---
 
-### Challenge G : NPV ของ Revenue Stream ต่อลูกค้า
+## Challenge G : NPV ของ Revenue Stream ต่อลูกค้า
 
-**Level:** `Advanced — Finance`
-
----
-
-## พื้นฐาน NPV
+### พื้นฐาน NPV
 
 **Net Present Value (NPV)** คือมูลค่าปัจจุบันของ cash flow ในอนาคต
 โดยหักลบผลของเวลาและ opportunity cost (discount rate) ออก
