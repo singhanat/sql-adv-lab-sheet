@@ -2217,13 +2217,13 @@ $$
 **การแปลง $t$ จาก `order_date`:**
 
 $$
-t = \frac{\text{EXTRACT(epoch FROM } (\text{orderDate} - \text{first\_order\_date})\text{)}}{365.25 \times 86{,}400}
+t = \frac{\text{EXTRACT(epoch FROM } (\text{orderDate} - \text{firstOrderDate})\text{)}}{365.25 \times 86{,}400}
 $$
 
 และ discounted revenue ของแต่ละ order:
 
 $$
-\text{discounted\Revenue} = \frac{CF_t}{(1.10)^{\,t}}
+\text{discountedRevenue} = \frac{CFt}{(1.10)^{\,t}}
 $$
 
 **ตัวอย่างตัวเลข:**
