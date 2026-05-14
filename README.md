@@ -658,6 +658,34 @@ ORDER BY e.employee_id;
 > BOLID ตกรอบ — ไม่เคยสั่งซื้อเลย
 > ลูกค้าที่ผ่านต้องเคยซื้อสินค้าที่แพงกว่าทุกชิ้นที่ German suppliers ขาย
 
+
+```sql
+
+SELECT c.customer_id, c.company_name, c.country
+from customers c
+WHERE EXISTS (
+	SELECT 1 FROM orders o
+	WHERE o.customer_id = c.customer_id
+)
+AND NOT EXISTS (
+	SELECT 1 FROM orders o
+	WHERE o.customer_id = c.customer_id
+	AND o.order_date BETWEEN '1998-01-01' AND '1998-12-31'
+)
+AND c.customer_id = ANY (
+	SELECT c.customer_id FROM orders o
+	JOIN order_details od ON o.order_id = od.order_id
+	JOIN products p ON od.product_id = p.product_id
+	WHERE p.unit_price > ALL (
+		SELECT unit_price From products p 
+		JOIN suppliers s ON p.supplier_id = s.supplier_id
+		WHERE s.country = 'Germany'
+	)
+	AND o.freight > 100
+)
+
+```
+
 ---
 
 
