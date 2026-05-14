@@ -460,6 +460,82 @@ ORDER BY order_date;
 
 ---
 
+### Challenge A : Lonely Cities
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+ทีม Business Development พบว่ามีบางเมืองที่ Supplier ของ Northwind ตั้งอยู่
+แต่กลับไม่มีลูกค้าแม้แต่รายเดียวในเมืองนั้น — เป็น **untapped market**
+
+ทีมต้องการรู้ว่าในเมือง "lonely" เหล่านั้น
+มีพนักงานคู่ไหนบ้างที่เคย ship order ไปในเมืองเดียวกัน (จากทั้งปี 1996 และ 1997)
+และทั้งคู่ต้องรายงานถึง Manager คนเดียวกัน
+
+**Task:**
+
+แสดง `city`, `employee_a`, `employee_b`, `manager_name`, `order_year`
+
+โดย:
+- `city` — เมืองที่มี Supplier **แต่ไม่มี** Customer (EXCEPT)
+- `employee_a` / `employee_b` — คู่พนักงานที่ `reports_to` เดียวกัน และ id ของ a < b (NON-EQUI SELF JOIN)
+- `manager_name` — Manager ของทั้งคู่ (SELF JOIN equi)
+- `order_year` — '1996' หรือ '1997' จาก UNION ALL
+
+เรียงตาม `city`, `order_year`, `employee_a`
+
+---
+
+**Sample Data:**
+
+*Table: `employees`*
+
+| employee_id | first_name | last_name | reports_to |
+| --- | --- | --- | --- |
+| 1 | Nancy | Davolio | 2 |
+| 2 | Andrew | Fuller | NULL |
+| 3 | Janet | Leverling | 2 |
+| 5 | Steven | Buchanan | 2 |
+| 6 | Michael | Suyama | 5 |
+
+*Table: `customers (sample)`*
+
+| customer_id | city |
+| --- | --- |
+| AROUT | London |
+| BSBEV | London |
+| ANATR | Mexico City |
+
+*Table: `suppliers (sample)`*
+
+| supplier_id | company_name | city |
+| --- | --- | --- |
+| 1 | Exotic Liquids | London |
+| 2 | New Orleans Cajun | New Orleans |
+| 3 | Grandma Kelly's | Ann Arbor |
+
+*Table: `orders (sample)`*
+
+| order_id | employee_id | ship_city | order_date |
+| --- | --- | --- | --- |
+| 10248 | 5 | New Orleans | 1996-07-04 |
+| 10400 | 3 | Ann Arbor | 1997-01-01 |
+| 10401 | 1 | Ann Arbor | 1997-01-01 |
+
+**Expected Output:**
+
+| city | employee_a | employee_b | manager_name | order_year |
+| --- | --- | --- | --- | --- |
+| Ann Arbor | Janet Leverling | Nancy Davolio | Andrew Fuller | 1997 |
+| New Orleans | ... | ... | ... | 1996 |
+| New Orleans | ... | ... | ... | 1997 |
+
+> Ann Arbor และ New Orleans มี Supplier แต่ไม่มี Customer → เป็น lonely cities
+> Janet และ Nancy ทั้งคู่ reports_to = 2 (Andrew Fuller) → เป็นคู่ที่ valid
+
+---
+
 ## Section II — Advanced Subqueries (Q9–Q14)
 
 ---
@@ -672,6 +748,91 @@ ORDER BY e.employee_id;
 </details>
 
 ---
+
+### Challenge B : Loyal but Forgotten
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+ทีม CRM สังเกตว่ามีลูกค้าบางกลุ่มที่ **หายไปเงียบ ๆ ในปี 1998**
+ทั้ง ๆ ที่ก่อนหน้านี้สั่งซื้อสม่ำเสมอ
+
+ที่น่าสนใจกว่านั้น — ลูกค้ากลุ่มนี้เคยซื้อสินค้าที่แพงกว่า
+**ทุกสินค้าที่ supplier จากประเทศ Germany ขาย** อย่างน้อย 1 ครั้ง
+
+ทีมต้องการตามหาคนกลุ่มนี้เพื่อส่ง offer พิเศษ
+
+**Task:**
+
+แสดง `customer_id`, `company_name`, `country`
+ของลูกค้าที่ตรงเงื่อนไขทั้งหมด เรียงตาม `company_name`
+
+เงื่อนไข:
+1. เคยสั่งซื้ออย่างน้อย 1 ครั้ง (EXISTS)
+2. ไม่มี order ในปี 1998 เลย (NOT EXISTS)
+3. เคยสั่งสินค้าที่มีราคาแพงกว่าทุกสินค้าที่ supplier จากเยอรมนีขาย (> ALL)
+4. customer_id ของลูกค้ากลุ่มนี้ต้องปรากฏใน order ที่มี freight > 100 อย่างน้อย 1 ใบ (= ANY)
+
+---
+
+**Sample Data:**
+
+*Table: `customers`*
+
+| customer_id | company_name | country |
+| --- | --- | --- |
+| ALFKI | Alfreds Futterkiste | Germany |
+| ANATR | Ana Trujillo | Mexico |
+| BOLID | Bólido Comidas | Spain |
+| ERNSH | Ernst Handel | Austria |
+
+*Table: `orders (sample)`*
+
+| order_id | customer_id | order_date | freight |
+| --- | --- | --- | --- |
+| 10248 | ALFKI | 1996-07-04 | 32.38 |
+| 10400 | ALFKI | 1997-01-01 | 83.93 |
+| 10500 | ANATR | 1998-02-10 | 15.20 |
+| 10501 | ERNSH | 1997-03-01 | 204.47 |
+
+*Table: `order_details (sample)`*
+
+| order_id | product_id |
+| --- | --- |
+| 10248 | 38 |
+| 10501 | 10 |
+
+*Table: `products (sample)`*
+
+| product_id | product_name | supplier_id | unit_price |
+| --- | --- | --- | --- |
+| 38 | Côte de Blaye | 18 | 263.50 |
+| 10 | Ikura | 4 | 31.00 |
+| 11 | Queso Cabrales | 5 | 21.00 |
+
+*Table: `suppliers (sample)`*
+
+| supplier_id | company_name | country |
+| --- | --- | --- |
+| 4 | Tokyo Traders | Japan |
+| 5 | Cooperativa | Spain |
+| 12 | Plutzer | Germany |
+
+**Expected Output:**
+
+| customer_id | company_name | country |
+| --- | --- | --- |
+| ALFKI | Alfreds Futterkiste | Germany |
+| ERNSH | Ernst Handel | Austria |
+| ... | ... | ... |
+
+> ANATR ตกรอบ — มี order ปี 1998
+> BOLID ตกรอบ — ไม่เคยสั่งซื้อเลย
+> ลูกค้าที่ผ่านต้องเคยซื้อสินค้าที่แพงกว่าทุกชิ้นที่ German suppliers ขาย
+
+---
+
 
 ### Q13 : สินค้าที่ราคาสูงกว่าค่าเฉลี่ยของ Category ตัวเอง (Derived Table)
 **Topic:** `Derived Table (Subquery in FROM)`
@@ -900,6 +1061,86 @@ ORDER BY c.category_name;
 </details>
 
 ---
+
+### Challenge C : The Slow Movers
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+ทีม Inventory สังเกตว่ามีสินค้าบางชิ้นที่ **ขายช้าผิดปกติ**
+ทั้ง ๆ ที่อยู่ใน category ที่โดยรวมขายดี
+
+สินค้าพวกนี้คือ "slow mover" — ยอดขายต่ำกว่าค่าเฉลี่ยของ category ตัวเอง
+แต่ category นั้นยังมีสินค้าที่ขายดีอยู่ด้วย (ไม่ใช่ category ที่แย่ทั้งหมด)
+
+และต้องเป็นสินค้าที่ยัง **active** อยู่ (discontinued = 0) เพื่อให้ worth investigating
+
+**Task:**
+
+แสดง `product_name`, `category_name`, `total_revenue`, `avg_category_revenue`
+ของสินค้าที่เป็น slow mover เรียงตาม `category_name`, `total_revenue`
+
+เงื่อนไข:
+1. `total_revenue` ต่ำกว่าค่าเฉลี่ย revenue ของ category ตัวเอง (Derived Table)
+2. category นั้นมีสินค้าที่ขายดีกว่าค่าเฉลี่ยอยู่ด้วยอย่างน้อย 1 ชิ้น (EXISTS)
+3. สินค้ายังไม่ discontinued (EXISTS แทน WHERE ตรง)
+4. กรองช่วงเวลาด้วย BETWEEN (ปี 1997 เท่านั้น)
+
+---
+
+**Sample Data:**
+
+*Table: `products`*
+
+| product_id | product_name | category_id | discontinued |
+| --- | --- | --- | --- |
+| 1 | Chai | 1 | 0 |
+| 2 | Chang | 1 | 0 |
+| 38 | Côte de Blaye | 1 | 0 |
+| 5 | Chef Anton's Gumbo Mix | 2 | 1 |
+| 6 | Grandma's Boysenberry | 2 | 0 |
+
+*Table: `categories`*
+
+| category_id | category_name |
+| --- | --- |
+| 1 | Beverages |
+| 2 | Condiments |
+
+*Table: `order_details (sample)`*
+
+| order_id | product_id | quantity | unit_price | discount |
+| --- | --- | --- | --- | --- |
+| 10400 | 1 | 10 | 18.00 | 0 |
+| 10401 | 38 | 5 | 263.50 | 0 |
+| 10402 | 2 | 3 | 19.00 | 0 |
+| 10403 | 6 | 8 | 25.00 | 0 |
+
+*Table: `orders (sample)`*
+
+| order_id | order_date |
+| --- | --- |
+| 10400 | 1997-01-01 |
+| 10401 | 1997-01-02 |
+| 10402 | 1997-01-03 |
+| 10403 | 1997-01-15 |
+
+**Expected Output:**
+
+| product_name | category_name | total_revenue | avg_category_revenue |
+| --- | --- | --- | --- |
+| Chai | Beverages | ... | ... |
+| Chang | Beverages | ... | ... |
+| Grandma's Boysenberry | Condiments | ... | ... |
+| ... | ... | ... | ... |
+
+> Côte de Blaye อยู่เหนือค่าเฉลี่ย Beverages → ไม่ใช่ slow mover
+> Chef Anton's Gumbo Mix discontinued = 1 → ตกรอบ
+> category ต้องมีสินค้าที่ขายดีอยู่ด้วย → ไม่ใช่ทุก category ที่ผ่าน
+
+---
+
 
 ### Q17 : Top 5 Order ที่มี Freight สูงสุด (ใช้ LIMIT ให้เร็ว)
 **Topic:** `LIMIT เพื่อลด work`
@@ -1171,6 +1412,74 @@ ORDER BY level, employee_id;
 </details>
 
 ---
+
+### Challenge D : Who Reports to a Top Seller
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+Andrew Fuller เป็น CEO ของ Northwind
+แต่ทีม HR ตั้งคำถามว่า — **พนักงานที่อยู่ใต้บังคับบัญชาของ top seller ตัวจริงเป็นใคร?**
+
+ไม่ใช่แค่ direct report แต่หมายถึงทุกคนใน subtree ของ org chart
+ที่ root คือพนักงานที่มียอดขายสูงสุด
+
+แสดง org chart ของ subtree นั้น พร้อม revenue ของแต่ละคน
+เรียงตาม level แล้วตาม revenue มากไปน้อย
+
+**Task:**
+
+แสดง `full_name`, `level` (นับจาก top seller = 0), `path`, `total_revenue`
+เรียงตาม `level`, `total_revenue` desc
+
+---
+
+**Sample Data:**
+
+*Table: `employees`*
+
+| employee_id | first_name | last_name | reports_to |
+| --- | --- | --- | --- |
+| 1 | Nancy | Davolio | 2 |
+| 2 | Andrew | Fuller | NULL |
+| 3 | Janet | Leverling | 2 |
+| 4 | Margaret | Peacock | 2 |
+| 5 | Steven | Buchanan | 2 |
+| 6 | Michael | Suyama | 5 |
+| 7 | Robert | King | 5 |
+
+*Table: `orders`*
+
+| order_id | employee_id |
+| --- | --- |
+| 10248 | 5 |
+| 10249 | 1 |
+| 10250 | 3 |
+
+*Table: `order_details`*
+
+| order_id | quantity | unit_price | discount |
+| --- | --- | --- | --- |
+| 10248 | 12 | 14.00 | 0 |
+| 10249 | 10 | 9.80 | 0.05 |
+| 10250 | 5 | 263.50 | 0 |
+
+**Expected Output:**
+
+| full_name | level | path | total_revenue |
+| --- | --- | --- | --- |
+| (top seller) | 0 | (top seller name) | ... |
+| (direct report 1) | 1 | (top seller) > (name) | ... |
+| (direct report 2) | 1 | (top seller) > (name) | ... |
+| ... | 2 | ... | ... |
+
+> top seller คือพนักงานที่มี total_revenue สูงสุด — หาจาก CTE ก่อน
+> recursive CTE เริ่มจาก top seller แทนที่จะเริ่มจาก CEO
+> แสดงเฉพาะ subtree ของ top seller (รวมตัวเอง)
+
+---
+
 
 ### Q21 : Top 2 สินค้าขายดีสุดของแต่ละ Category (CTE + ROW_NUMBER)
 **Topic:** `CTE + Window Function`
@@ -1454,6 +1763,74 @@ ORDER BY employee_id, order_date;
 
 ---
 
+### Challenge E : The Comeback Customer
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+ทีม CRM สังเกตว่าบางลูกค้า **หายไปนาน แล้วกลับมาซื้ออีกครั้ง**
+
+คำถามที่น่าสนใจคือ — หลังจาก comeback แล้ว
+revenue ของพวกเขาดีขึ้นหรือแย่ลง?
+
+ทีมต้องการ report ที่แสดง gap (จำนวนวันที่หายไป) ระหว่าง order แต่ละคู่
+พร้อม running revenue และ moving average เพื่อดู trend หลัง comeback
+
+**Task:**
+
+แสดง `customer_id`, `order_id`, `order_date`, `order_revenue`,
+`order_sequence` (ROW_NUMBER),
+`days_since_prev_order` (จำนวนวันจาก order ก่อนหน้า — NULL ที่ order แรก),
+`is_comeback` ('Y' ถ้า gap > 90 วัน, 'N' ถ้าไม่ใช่, NULL ที่ order แรก),
+`cumulative_revenue` (Running Total),
+`moving_avg_revenue_3` (Moving Avg 3 order)
+
+เรียงตาม `customer_id`, `order_date`
+
+---
+
+**Sample Data:**
+
+*Table: `orders (sample)`*
+
+| order_id | customer_id | order_date |
+| --- | --- | --- |
+| 10248 | VINET | 1996-07-04 |
+| 10274 | VINET | 1996-08-12 |
+| 10295 | VINET | 1996-09-02 |
+| 10737 | VINET | 1997-11-11 |
+| 10249 | TOMSP | 1996-07-05 |
+| 10356 | TOMSP | 1996-11-18 |
+
+*Table: `order_details (sample)`*
+
+| order_id | quantity | unit_price | discount |
+| --- | --- | --- | --- |
+| 10248 | 12 | 14.00 | 0 |
+| 10274 | 6 | 31.00 | 0 |
+| 10295 | 4 | 18.00 | 0 |
+| 10737 | 5 | 17.45 | 0 |
+| 10249 | 9 | 42.40 | 0 |
+| 10356 | 10 | 19.00 | 0 |
+
+**Expected Output:**
+
+| customer_id | order_id | order_date | order_revenue | order_sequence | days_since_prev | is_comeback | cumulative_revenue | moving_avg_3 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| VINET | 10248 | 1996-07-04 | 261.10 | 1 | NULL | NULL | 261.10 | 261.10 |
+| VINET | 10274 | 1996-08-12 | 186.00 | 2 | 39 | N | 447.10 | ... |
+| VINET | 10295 | 1996-09-02 | 72.00 | 3 | 21 | N | 519.10 | ... |
+| VINET | 10737 | 1997-11-11 | 87.25 | 4 | 435 | Y | 606.35 | ... |
+| TOMSP | 10249 | 1996-07-05 | 381.60 | 1 | NULL | NULL | 381.60 | 381.60 |
+| TOMSP | 10356 | 1996-11-18 | 190.00 | 2 | 136 | Y | 571.60 | ... |
+
+> VINET order ที่ 4 — gap 435 วัน → is_comeback = 'Y'
+> TOMSP order ที่ 2 — gap 136 วัน → is_comeback = 'Y'
+> order แรกของแต่ละลูกค้า days_since_prev และ is_comeback เป็น NULL เสมอ
+
+---
+
 ### Q26 : จัดอันดับพนักงานตามยอดขาย (RANK vs DENSE_RANK)
 **Topic:** `RANK() / DENSE_RANK()`
 
@@ -1726,6 +2103,217 @@ ORDER BY customer_id, order_date;
 
 </details>
 
+### Challenge F : Category Stars
+
+**Level:** `Advanced — Combined` &nbsp;|&nbsp; **1 SQL Statement**
+
+**Scenario:**
+
+ทีม Product ตั้งคำถามที่น่าสนใจ:
+
+สินค้าที่เป็น **"ดาวเด่น"** ใน category ตัวเอง —
+เมื่อนำไปเทียบกับ catalog ทั้งหมด มันอยู่ที่ percentile ไหน?
+
+และสินค้าอันดับ 1 ของแต่ละ category
+เปรียบเทียบกับอันดับ 2 ต่างกันมากแค่ไหน?
+
+**Task:**
+
+แสดง `category_name`, `product_name`, `total_revenue`,
+`rank_in_category` (DENSE_RANK ใน category),
+`global_percentile` (PERCENT_RANK เทียบกับทุกสินค้าใน catalog — ทศนิยม 2),
+`revenue_vs_prev_rank` (ต่างจากอันดับก่อนหน้าใน category เท่าไหร่ — LAG),
+`category_top_revenue` (revenue อันดับ 1 ของ category นั้น — FIRST_VALUE),
+`category_2nd_revenue` (revenue อันดับ 2 ของ category นั้น — NTH_VALUE)
+
+เรียงตาม `category_name`, `rank_in_category`
+
+---
+
+**Sample Data:**
+
+*Table: `categories`*
+
+| category_id | category_name |
+| --- | --- |
+| 1 | Beverages |
+| 2 | Condiments |
+| ... | ... |
+
+*Table: `products`*
+
+| product_id | product_name | category_id |
+| --- | --- | --- |
+| 1 | Chai | 1 |
+| 2 | Chang | 1 |
+| 38 | Côte de Blaye | 1 |
+| 3 | Aniseed Syrup | 2 |
+| 4 | Chef Anton's | 2 |
+| ... | ... | ... |
+
+*Table: `order_details`*
+
+| order_id | product_id | quantity | unit_price | discount |
+| --- | --- | --- | --- | --- |
+| 10248 | 38 | 5 | 263.50 | 0 |
+| 10249 | 2 | 10 | 19.00 | 0 |
+| 10250 | 1 | 3 | 18.00 | 0 |
+| ... | ... | ... | ... | ... |
+
+**Expected Output:**
+
+| category_name | product_name | total_revenue | rank_in_category | global_percentile | revenue_vs_prev_rank | category_top_revenue | category_2nd_revenue |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Beverages | Côte de Blaye | 141396.74 | 1 | 1.00 | NULL | 141396.74 | 47919.00 |
+| Beverages | Chang | 47919.00 | 2 | 0.87 | 93477.74 | 141396.74 | 47919.00 |
+| Beverages | Chai | ... | 3 | ... | ... | 141396.74 | 47919.00 |
+| Condiments | Vegie-spread | ... | 1 | ... | NULL | ... | ... |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+
+> `revenue_vs_prev_rank` = revenue อันดับนั้น - revenue อันดับก่อนหน้า (LAG)
+> อันดับ 1 ของแต่ละ category ได้ NULL เพราะไม่มีอันดับก่อนหน้า
+> `global_percentile` เทียบกับทุกสินค้าใน catalog — Côte de Blaye อยู่ที่ 1.00 เพราะขายดีที่สุดทั้งหมด
+
+---
+
+### Challenge G : NPV ของ Revenue Stream ต่อลูกค้า
+
+**Level:** `Advanced — Finance` &nbsp;|&nbsp; **1 SQL Statement**
+
+---
+
+## พื้นฐาน NPV
+
+**Net Present Value (NPV)** คือมูลค่าปัจจุบันของ cash flow ในอนาคต
+โดยหักลบผลของเวลาและ opportunity cost (discount rate) ออก
+
+$$
+NPV = \sum_{t=0}^{n} \frac{CF_t}{(1 + r)^t}
+$$
+
+| ตัวแปร | ความหมาย |
+| --- | --- |
+| $CF_t$ | Cash flow ที่เกิดขึ้นใน period $t$ |
+| $r$ | Discount rate ต่อ period |
+| $t$ | จำนวน period นับจาก cash flow แรก |
+| $n$ | จำนวน period ทั้งหมด |
+
+---
+
+## ข้อสมมติที่ใช้ในโจทย์นี้ (Assumptions)
+
+| # | ค่าสมมติ | ค่าที่ใช้ | เหตุผล |
+| --- | --- | --- | --- |
+| 1 | Discount rate $(r)$ | $0.10$ (10% ต่อปี) | สมมติ cost of capital / hurdle rate ของบริษัท |
+| 2 | หน่วยเวลา $(t)$ | ปี (decimal) | เช่น 6 เดือน = 0.5 ปี, 18 เดือน = 1.5 ปี |
+| 3 | จุดเริ่มต้น $(t=0)$ | order แรกของลูกค้าคนนั้น | $CF_0$ ไม่ถูก discount เพราะ $(1+r)^0 = 1$ |
+| 4 | จำนวนวันต่อปี | $365.25$ วัน | รวม leap year เฉลี่ย: $\frac{365 \times 3 + 366}{4} = 365.25$ |
+| 5 | วินาทีต่อวัน | $86{,}400$ วินาที | $24 \times 60 \times 60 = 86{,}400$ |
+| 6 | `EXTRACT(epoch)` | คืนค่าเป็นวินาที | PostgreSQL: epoch ของ interval = จำนวนวินาทีทั้งหมด |
+| 7 | Revenue ต่อ order | $q \times p \times (1 - d)$ | revenue สุทธิหลังหักส่วนลด $d$ แล้ว (ก่อนต้นทุน) |
+
+---
+
+**การแปลง $t$ จาก `order_date`:**
+
+$$
+t = \frac{\text{EXTRACT(epoch FROM } (\text{order\_date} - \text{first\_order\_date})\text{)}}{365.25 \times 86{,}400}
+$$
+
+และ discounted revenue ของแต่ละ order:
+
+$$
+\text{discounted\_revenue} = \frac{CF_t}{(1.10)^{\,t}}
+$$
+
+**ตัวอย่างตัวเลข:**
+
+$$
+\begin{aligned}
+\text{first\_order\_date} &= \text{1996-07-04} \\
+\text{order\_date}        &= \text{1997-11-11} \\
+\text{interval}           &= 495 \text{ วัน} \\[6pt]
+\text{epoch}              &= 495 \times 86{,}400 = 42{,}768{,}000 \text{ วินาที} \\[6pt]
+t                         &= \frac{42{,}768{,}000}{365.25 \times 86{,}400} = 1.3552 \text{ ปี} \\[6pt]
+\text{discounted\_revenue} &= \frac{CF}{(1.10)^{1.3552}} = \frac{CF}{1.1377}
+\end{aligned}
+$$
+
+> **ทำไมใช้ $365.25$ ไม่ใช่ $365$?** (Assumption #4)
+>
+> $$\text{วันเฉลี่ยต่อปี} = \frac{365 \times 3 + 366}{4} = 365.25$$
+>
+> ถ้าใช้ $365$ จะเกิด error สะสมเมื่อช่วงเวลายาวข้าม leap year
+
+---
+
+**Scenario:**
+
+ทีม Finance ต้องการประเมิน **มูลค่าปัจจุบันของ revenue stream** ที่ได้จากลูกค้าแต่ละราย
+ตลอดช่วงเวลาที่เป็นลูกค้า โดยใช้ข้อสมมติข้างต้นทั้งหมด
+
+และต้องการเห็นทั้ง **ระดับ order** (discounted revenue + cumulative NPV)
+และ **ระดับลูกค้า** (NPV รวม + อันดับ + เทียบกับ revenue ปกติที่ไม่ discount)
+
+---
+
+**Task:**
+
+แสดง `customer_id`, `order_id`, `order_date`, `order_revenue`,
+`years_since_first_order` ($t$ — ทศนิยม 4),
+`discounted_revenue` ($= CF_t / (1+r)^t$ ทศนิยม 2),
+`cumulative_npv` (Running SUM ของ `discounted_revenue` ต่อลูกค้า ทศนิยม 2),
+`customer_total_npv` ($NPV$ รวมทั้งหมดของลูกค้า ทศนิยม 2),
+`npv_rank` (`DENSE_RANK` ตาม `customer_total_npv` desc),
+`total_revenue_no_discount` (SUM revenue ปกติของลูกค้า — เทียบให้เห็นส่วนต่างกับ NPV)
+
+เรียงตาม `npv_rank`, `order_date`
+
+---
+
+**Sample Data:**
+
+*Table: `orders`*
+
+| order_id | customer_id | order_date |
+| --- | --- | --- |
+| 10248 | VINET | 1996-07-04 |
+| 10274 | VINET | 1996-08-12 |
+| 10295 | VINET | 1996-09-02 |
+| 10737 | VINET | 1997-11-11 |
+| 10249 | TOMSP | 1996-07-05 |
+| 10356 | TOMSP | 1996-11-18 |
+
+*Table: `order_details`*
+
+| order_id | quantity | unit_price | discount |
+| --- | --- | --- | --- |
+| 10248 | 12 | 14.00 | 0.00 |
+| 10248 | 10 | 9.80 | 0.05 |
+| 10274 | 6 | 31.00 | 0.00 |
+| 10295 | 4 | 18.00 | 0.00 |
+| 10737 | 5 | 17.45 | 0.00 |
+| 10249 | 9 | 42.40 | 0.00 |
+| 10356 | 10 | 19.00 | 0.00 |
+
+**Expected Output (ตัวอย่าง):**
+
+| customer_id | order_id | order_date | order_revenue | years_since_first_order | discounted_revenue | cumulative_npv | customer_total_npv | npv_rank | total_revenue_no_discount |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| VINET | 10248 | 1996-07-04 | 261.10 | 0.0000 | 261.10 | 261.10 | 592.78 | 1 | 606.35 |
+| VINET | 10274 | 1996-08-12 | 186.00 | 0.1068 | 184.12 | 445.22 | 592.78 | 1 | 606.35 |
+| VINET | 10295 | 1996-09-02 | 72.00 | 0.1643 | 70.88 | 516.10 | 592.78 | 1 | 606.35 |
+| VINET | 10737 | 1997-11-11 | 87.25 | 1.3552 | 76.68 | 592.78 | 592.78 | 1 | 606.35 |
+| TOMSP | 10249 | 1996-07-05 | 381.60 | 0.0000 | 381.60 | 381.60 | 564.98 | 2 | 571.60 |
+| TOMSP | 10356 | 1996-11-18 | 190.00 | 0.3723 | 183.38 | 564.98 | 564.98 | 2 | 571.60 |
+
+> **สังเกต:**
+> - VINET order แรก $t=0$ → `discounted_revenue` = `order_revenue` = 261.10 เพราะ $(1.10)^0 = 1$
+> - VINET order สุดท้าย $t=1.3552$ → 87.25 ถูก discount เหลือ 76.68
+> - `customer_total_npv` (592.78) < `total_revenue_no_discount` (606.35) เสมอ — เพราะ NPV หักมูลค่าเวลาออก
+> - TOMSP มี NPV รวมน้อยกว่า VINET จึงได้ `npv_rank` = 2
+
+---
 
 
 ```
