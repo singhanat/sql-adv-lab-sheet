@@ -291,10 +291,7 @@ ORDER BY order_date;
 
 **Scenario:**
 
-ทีม Business Development พบว่ามีบางเมืองที่ Supplier ของ Northwind ตั้งอยู่
-แต่กลับไม่มีลูกค้าแม้แต่รายเดียวในเมืองนั้น — เป็น **untapped market**
 
-ทีมต้องการรู้ว่าในเมือง "lonely" เหล่านั้น
 มีพนักงานคู่ไหนบ้างที่เคย ship order ไปในเมืองเดียวกัน (จากทั้งปี 1996 และ 1997)
 และทั้งคู่ต้องรายงานถึง Manager คนเดียวกัน
 
@@ -303,7 +300,6 @@ ORDER BY order_date;
 แสดง `city`, `employee_a`, `employee_b`, `manager_name`, `order_year`
 
 โดย:
-- `city` — เมืองที่มี Supplier **แต่ไม่มี** Customer (EXCEPT)
 - `employee_a` / `employee_b` — คู่พนักงานที่ `reports_to` เดียวกัน และ id ของ a < b (NON-EQUI SELF JOIN)
 - `manager_name` — Manager ของทั้งคู่ (SELF JOIN equi)
 - `order_year` — '1996' หรือ '1997' จาก UNION ALL
@@ -350,14 +346,11 @@ ORDER BY order_date;
 
 **Expected Output:**
 
-| city | employee_a | employee_b | manager_name | order_year |
-| --- | --- | --- | --- | --- |
-| Ann Arbor | Janet Leverling | Nancy Davolio | Andrew Fuller | 1997 |
-| New Orleans | ... | ... | ... | 1996 |
-| New Orleans | ... | ... | ... | 1997 |
-
-> Ann Arbor และ New Orleans มี Supplier แต่ไม่มี Customer → เป็น lonely cities
-> Janet และ Nancy ทั้งคู่ reports_to = 2 (Andrew Fuller) → เป็นคู่ที่ valid
+| employee_a | employee_b | manager_name | order_year |
+| --- | --- | --- | --- |
+| Janet Leverling | Nancy Davolio | Andrew Fuller | 1997 |
+| ... | ... | ... | 1996 |
+| ... | ... | ... | 1997 |
 
 ---
 
