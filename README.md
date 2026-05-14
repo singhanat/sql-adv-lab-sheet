@@ -1428,6 +1428,49 @@ revenue ของพวกเขาดีขึ้นหรือแย่ลง
 > TOMSP order ที่ 2 — gap 136 วัน → is_comeback = 'Y'
 > order แรกของแต่ละลูกค้า days_since_prev และ is_comeback เป็น NULL เสมอ
 
+
+```
+WITH order_revenue AS (
+
+	SELECT 
+		o.order_id, 
+		o.customer_id,
+		o.order_date,
+		SUM(od.quantity * od.unit_price * (1 - od.discount)) AS order_revenue
+	FROM orders o
+	JOIN order_details od ON o.order_id = od.order_id
+	GROUP BY o.order_id,  o.customer_id, o.order_date
+),
+order_with_lag AS (
+	SELECT 
+		o.order_id, 
+		o.customer_id,
+		o.order_date,
+		o.order_revenue,
+		lag(order_date) over (
+			partition by customer_id
+			order by order_date
+		) prev_order_date
+	FROM order_revenue o
+)
+SELECT 
+	customer_id,
+	order_id,
+	order_date,
+	order_revenue,
+	ROW_NUMBER() over (PARTITION BY customer_id ORDER BY order_date) as order_squence,
+	(order_date - prev_order_date) as days_since_prev_order,
+	CASE
+		WHEN prev_order_date IS NULL THEN NULL
+		WHEN (order_date - prev_order_date) > 90 THEN 'Y'
+		ELSE 'N'
+	END AS is_comback,
+	SUM(order_revenue) OVER (PARTITION BY customer_id ORDER BY order_date
+		ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cummulative_revenue,
+	AVG(order_revenue) OVER (PARTITION BY customer_id ORDER BY order_date
+		ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) as moving_avg_revenue_3
+FROM order_with_lag
+```
 ---
 
 ### Q26 : จัดอันดับพนักงานตามยอดขาย (RANK vs DENSE_RANK)
